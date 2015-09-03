@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["小野寺　優太"]
   spec.email         = ["s1160054@gmail.com"]
 
-  spec.summary       = %q{モデルで定義されたメソッド、関連、バリデーションを、このGemはコンソール上で美しく表示します。}
+  spec.summary       = %q{モデルで定義されたメソッド、関連、バリデーションを、Railsコンソール上で美しく表示します。}
   spec.description   = %q{すべてのモデルに「to」というクラスメソッド及びインスタンスメソッドが追加されます。}
   spec.homepage      = "https://s1160054@bitbucket.org/s1160054/pretty_association_inspect.git"
   spec.license       = "MIT"
