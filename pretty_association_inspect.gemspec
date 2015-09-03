@@ -11,13 +11,13 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{モデルで定義されたメソッド、関連、バリデーションを、このGemはコンソール上で美しく表示します。}
   spec.description   = %q{すべてのモデルに「to」というクラスメソッド及びインスタンスメソッドが追加されます。}
-  spec.homepage      = ""
+  spec.homepage      = "https://s1160054@bitbucket.org/s1160054/pretty_association_inspect.git"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
   # delete this section to allow pushing this gem to any host.
   if spec.respond_to?(:metadata)
-    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
+    spec.metadata['allowed_push_host'] = "https://s1160054@bitbucket.org/s1160054/pretty_association_inspect.git"
   else
     raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
   end
