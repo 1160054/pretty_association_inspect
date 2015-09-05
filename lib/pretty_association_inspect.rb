@@ -100,4 +100,4 @@ module PrettyAssociationInspect
 
 end
 
-PrettyAssociationInspect.all_models_define
+#PrettyAssociationInspect.all_models_define
