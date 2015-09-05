@@ -25,8 +25,12 @@ module PrettyAssociationInspect
     model.reflect_on_all_associations.each_with_object({}) do |m, hash|
       name = m.class.class_name.gsub("Reflection", "")
       hash[name] ||= []
-      human_name = PrettyAssociationInspect.japanese_scripe(m.klass.model_name.human)
-      hash[name] << {association: m.name, human: human_name, model_name: m.active_record.name }
+      human_name = PrettyAssociationInspect.jp_scripe(m.klass.model_name.human)
+      hash[name] << {
+        association: m.name,
+        human: human_name,
+        model_name: m.active_record.name
+      }
     end
   end
 
@@ -47,21 +51,23 @@ module PrettyAssociationInspect
       klass.first.attributes.each{|k ,v|
         column = "%20s" % k
         value  = PrettyAssociationInspect.value_convert(k, v, klass)
-        jp_val = PrettyAssociationInspect.japanese_scripe(klass.human_attribute_name(k))
+        jp_val = PrettyAssociationInspect.jp_scripe(klass.human_attribute_name(k))
         db_val = "%5s"  % v
         pretty_associations_array <<  "#{column} #{jp_val} #{db_val}"
       }
     }
     puts "-"*100;
-    puts klass.name + "#{japanese_scripe(klass.model_name.human)}"
+    puts klass.name + "#{jp_scripe(klass.model_name.human)}"
     puts "[クラスメソッド]"
     base_pattern   = "(before|after|around)_(add|remove|restore)|_associated_records_for_|inherited"
     extr_pattern   = "attribute_type_decorations|soft_de|_restore_callback|indexed_|_by_resource"
     delete_pattern = Regexp.new( [ base_pattern, extr_pattern ].join('|') )
-    puts (model.methods(false) - model.instance_methods).delete_if{|name|
+    class_m  = model.methods(false) - model.instance_methods
+    puts (class_m).delete_if{|name|
       delete_pattern.match(name) }.sort.join(', ')
     puts "[インスタンスメソッド]"
-    puts (model.instance_methods(false) - model.superclass.instance_methods).delete_if{|name|
+    instance_m = model.instance_methods(false) - model.superclass.instance_methods
+    puts (instance_m).delete_if{|name|
       delete_pattern.match(name) }.sort.join(', ')
     puts "[バリデーション]"
     puts model.validators.map{|m|
@@ -77,7 +83,7 @@ module PrettyAssociationInspect
   end
 
   # 日本語だけ抽出
-  def japanese_scripe(str)
+  def jp_scripe(str)
     japanese = Regexp.new(/[亜-熙ぁ-んァ-ヶ]/)
     "(#{str})" if japanese =~ str
   end
@@ -99,5 +105,3 @@ module PrettyAssociationInspect
   end
 
 end
-
-#PrettyAssociationInspect.all_models_define
