@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+
 # モデルに関連情報を見やすく表示するメソッドを定義します。
 module PrettyAssociationInspect
   extend self
-
   # 『関連を可愛く表示するメソッド』を定義する
   def pretty_association_inspect_define(klass)
     klass.class_eval do |model|
@@ -100,17 +100,24 @@ module PrettyAssociationInspect
   # 全てのモデルを読み込み、モデル名配列を返す
   def load_all_models
     models_file_path = Dir.glob(Rails.root.join("app/models/*")).grep(/rb\z/)
-    models_file_path.each { |m| require(m) }
+    models_file_path.each { |m| load(m) }
     return ActiveRecord::Base.subclasses.map(&:name)
   end
 
 end
 
-if defined?(Pry)
-  module Kernel
-    extend self
+module Kernel
+  extend self
+
+  if defined?(Pry)
     def to( obj = self )
       binding.pry obj
     end
   end
+
+  def a
+    load '/home/developer/pretty_association_inspect/lib/pretty_association_inspect.rb'
+    PrettyAssociationInspect.all_models_define
+  end
+
 end
