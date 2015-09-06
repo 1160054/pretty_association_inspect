@@ -105,3 +105,12 @@ module PrettyAssociationInspect
   end
 
 end
+
+if defined?(Pry)
+  module Kernel
+    extend self
+    def to( obj )
+      binding.pry obj || self
+    end
+  end
+end
