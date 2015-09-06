@@ -109,8 +109,8 @@ end
 if defined?(Pry)
   module Kernel
     extend self
-    def to( obj )
-      binding.pry obj || self
+    def to( obj = self )
+      binding.pry obj
     end
   end
 end
