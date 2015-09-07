@@ -29,7 +29,7 @@ module PrettyAssociationInspect
       return false if route[0].cost.nil?
       route_arr = route.map{|node| node.id}
       start_name = route_arr.pop.to_s.singularize.capitalize
-      ap "#{start_name}.first." + route_arr.reverse.join(".")
+      ap "#{start_name}.first." + route_arr.reverse.join(".").gsub("s.", "s.first.")
     end
 
     def minimum_route(start_id, goal_id)
