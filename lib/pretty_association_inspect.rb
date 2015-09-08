@@ -208,12 +208,11 @@ module Kernel
     load '/home/developer/pretty_association_inspect/lib/pretty_association_inspect.rb'
     files_path = Dir.glob(Rails.root.join("app/**/*")).grep(/\.rb\z/)
     files_path.each { |m| load(m) }
-
     [
      PrettyAssociationInspect.all_models_define,
      ApplicationController.subclasses.each_with_object({}){|m, h|
        h[m.name.to_sym] = m.action_methods.to_a.join(', ')
      }
-     ]
+    ]
   end
 end
