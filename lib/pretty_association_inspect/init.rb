@@ -1,3 +1,20 @@
+load "/Users/home/pretty_association_inspect/lib/pretty_association_inspect.rb"
+PrettyAssociationInspect.all_models_define
+module Kernel
+  extend self
+
+  if defined?(Pry)
+    def to( obj = self )
+      binding.pry obj
+    end
+  end
+
+  def a
+    load '/Users/home/pretty_association_inspect/lib/pretty_association_inspect.rb'
+    "Models defined num is #{PrettyAssociationInspect.all_models_define.count}"
+  end
+end
+
 Pry.editor = 'emacs' if defined?(Pry)
 
 if defined?(PryByebug)

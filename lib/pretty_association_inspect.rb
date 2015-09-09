@@ -28,7 +28,7 @@ module PrettyAssociationInspect
     def print_route(route)
       return false if route[0].cost.nil?
       route_arr = route.map{|node| node.id}
-      start_name = route_arr.pop.to_s.singularize.capitalize
+      start_name = route_arr.pop.to_s.camelize
       ap "#{start_name}.first." + route_arr.reverse.join(".").gsub("s.", "s.first.")
     end
 
@@ -59,6 +59,7 @@ module PrettyAssociationInspect
         next_node.edges.each do |edge|
           reachble_node = @nodes.find { |node| node.id == edge.node_id }
           reachble_cost = next_node.cost + edge.cost
+          next if reachble_node.nil?
           if reachble_node.cost.nil? || reachble_cost < reachble_node.cost
             reachble_node.cost = reachble_cost
             reachble_node.from = next_node.id
@@ -69,8 +70,7 @@ module PrettyAssociationInspect
   end
 
   def build_association_node(start)
-    models = load_all_models
-
+    models = ActiveRecord::Base.subclasses.map(&:name)
     data = models.each_with_object({}) do |model_name_str, hash|
       eval(model_name_str).reflect_on_all_associations.each do |m|
         model_single_name   = eval(model_name_str).model_name.singular.to_sym
@@ -93,21 +93,28 @@ module PrettyAssociationInspect
   # 『関連を可愛く表示するメソッド』を定義する
   def pretty_association_inspect_define(klass)
     klass.class_eval do |model|
-      self.define_singleton_method(:to){ |start = nil|
+      self.define_singleton_method(:to){
         associations_hash = PrettyAssociationInspect.build_association_hash(model)
         PrettyAssociationInspect.printed(klass, model, associations_hash)
-        model_name_sym = model_name.singular.to_sym
-        PrettyAssociationInspect.build_association_node start || model_name_sym
-        return self.last || self
+        return self.first || self
       }
 
-      define_method(:to){ |start = nil|
+      define_method(:to){
         associations_hash = PrettyAssociationInspect.build_association_hash(model)
         PrettyAssociationInspect.printed(klass, model, associations_hash)
-        model_name_sym = model_name.singular.to_sym
-        PrettyAssociationInspect.build_association_node start || model_name_sym
         return self
       }
+      self.define_singleton_method(:toto){ |start = nil|
+        model_name_sym = model_name.singular.to_sym
+        PrettyAssociationInspect.build_association_node start || model_name_sym
+        return nil
+      }
+      define_method(:toto){ |start = nil|
+        model_name_sym = model_name.singular.to_sym
+        PrettyAssociationInspect.build_association_node start || model_name_sym
+        return nil
+      }
+
     end
   end
 
@@ -130,7 +137,7 @@ module PrettyAssociationInspect
       hash[name] << [
         m.name, human_name
       ].compact.join(' | ')
-      hash[name] = hash[name].join(', ')
+      hash[name] = hash[name]
     end
   end
 
@@ -189,30 +196,8 @@ module PrettyAssociationInspect
   # 全てのモデルを読み込み、モデル名配列を返す
   def load_all_models
     models_file_path = Dir.glob(Rails.root.join("app/models/*")).grep(/rb\z/)
-    models_file_path.each { |m| load(m) }
+    models_file_path.each { |m| require(m) }
     return ActiveRecord::Base.subclasses.map(&:name)
   end
 
-end
-
-module Kernel
-  extend self
-
-  if defined?(Pry)
-    def to( obj = self )
-      binding.pry obj
-    end
-  end
-
-  def a
-    load '/home/developer/pretty_association_inspect/lib/pretty_association_inspect.rb'
-    files_path = Dir.glob(Rails.root.join("app/**/*")).grep(/\.rb\z/)
-    files_path.each { |m| load(m) }
-    [
-     PrettyAssociationInspect.all_models_define,
-     ApplicationController.subclasses.each_with_object({}){|m, h|
-       h[m.name.to_sym] = m.action_methods.to_a.join(', ')
-     }
-    ]
-  end
 end
