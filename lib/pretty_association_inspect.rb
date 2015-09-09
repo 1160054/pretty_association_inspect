@@ -27,9 +27,11 @@ module PrettyAssociationInspect
 
     def print_route(route)
       return false if route[0].cost.nil?
-      route_arr = route.map{|node| node.id}
+      route_arr  = route.map{|node| node.id}
       start_name = route_arr.pop.to_s.camelize
-      ap "#{start_name}.first." + route_arr.reverse.join(".").gsub("s.", "s.first.")
+      route_str  = "#{start_name}.first." + route_arr.reverse.join(".").gsub("s.", "s.first.")
+      ap route_str
+      return route_str
     end
 
     def minimum_route(start_id, goal_id)
@@ -82,11 +84,13 @@ module PrettyAssociationInspect
       end
     end
     graph = Graph.new(data)
+    route_arr = []
     data.each do |goal, v|
       next if start == goal
-      graph.print_route(graph.minimum_route(start, goal))
+      new_route = graph.print_route(graph.minimum_route(start, goal))
+      route_arr << new_route if new_route
     end
-    nil
+    route_arr
   end
 
 
@@ -106,12 +110,14 @@ module PrettyAssociationInspect
       }
       self.define_singleton_method(:toto){ |start = nil|
         model_name_sym = model_name.singular.to_sym
-        PrettyAssociationInspect.build_association_node start || model_name_sym
+        route_arr = PrettyAssociationInspect.build_association_node start || model_name_sym
+        ap route_arr
         return nil
       }
       define_method(:toto){ |start = nil|
         model_name_sym = model_name.singular.to_sym
-        PrettyAssociationInspect.build_association_node start || model_name_sym
+        route_arr = PrettyAssociationInspect.build_association_node start || model_name_sym
+        ap route_arr
         return nil
       }
 
