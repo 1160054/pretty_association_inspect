@@ -152,16 +152,20 @@ module PrettyAssociationInspect
   # 表示
   def printed(klass, model, associations_hash)
     pretty_hash = {}
-    klass.class_eval{|klass|
-      klass.first.attributes.each{|k ,v|
-        pretty_hash[k.to_sym] =
-        [
-         PrettyAssociationInspect.value_convert(k, v, klass),
-         PrettyAssociationInspect.jp_scripe(klass.human_attribute_name(k)),
-         v
-        ].compact.join(' | ')
+    begin
+      klass.class_eval{|klass|
+        klass.first.attributes.each{|k ,v|
+          pretty_hash[k.to_sym] =
+            [
+              PrettyAssociationInspect.value_convert(k, v, klass),
+              PrettyAssociationInspect.jp_scripe(klass.human_attribute_name(k)),
+              v
+            ].compact.join(' | ')
+        }
       }
-    }
+    rescue => e
+      ap e
+    end
     ap "-"*100;
     ap "#{klass.name} #{jp_scripe(klass.model_name.human)}"
     ap "[クラスメソッド]"
