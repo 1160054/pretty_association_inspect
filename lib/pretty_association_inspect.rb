@@ -29,6 +29,7 @@ module PrettyAssociationInspect
       return false if route[0].cost.nil?
       route_arr  = route.map{|node| node.id}
       start_name = route_arr.pop.to_s.camelize
+      route_str  = route_arr.reverse.join(".").gsub("s.", "s.first.")
       route_str  = "#{start_name}.first." + route_arr.reverse.join(".").gsub("s.", "s.first.")
       ap route_str
       return route_str
@@ -84,13 +85,14 @@ module PrettyAssociationInspect
       end
     end
     graph = Graph.new(data)
-    route_arr = []
+    route_hash = {}
     data.each do |goal, v|
       next if start == goal
       new_route = graph.print_route(graph.minimum_route(start, goal))
-      route_arr << new_route if new_route
+      human_str = PrettyAssociationInspect.jp_scripe(eval(goal.to_s.camelize.singularize).model_name.human)
+      route_hash["#{human_str} #{goal}"] = new_route if new_route
     end
-    route_arr
+    route_hash
   end
 
 
