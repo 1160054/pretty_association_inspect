@@ -35,7 +35,7 @@ module PrettyAssociationInspect
       h[route_arr.first] = route_arr.second if route_arr.count == 2
       h[route_arr.first] = {route_arr.second => route_arr.third} if route_arr.count == 3
       h[route_arr.first] = {route_arr.second => {route_arr.third => route_arr.fourth}} if route_arr.count == 4
-      route_str = "#{start_name}.joins(#{h.to_s}).last." + route_arr.join(".").gsub("s.", "s.last.")
+      route_str = "#{start_name}.joins(#{h.to_s.gsub('=>{}','')}).last." + route_arr.join(".").gsub("s.", "s.last.")
       ap route_str
       return route_str
     end
