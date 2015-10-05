@@ -29,14 +29,19 @@ module PrettyAssociationInspect
       return false if route[0].cost.nil?
       route_arr  = route.map{|node| node.id}
       start_name = route_arr.pop.to_s.camelize
-      route_str  = route_arr.reverse.join(".").gsub("s.", "s.first.")
-      route_str  = "#{start_name}.first." + route_arr.reverse.join(".").gsub("s.", "s.first.")
+      route_arr.reverse!
+      h = Hash.new
+      h[route_arr.first] = {} if route_arr.count == 1
+      h[route_arr.first] = route_arr.second if route_arr.count == 2
+      h[route_arr.first] = {route_arr.second => route_arr.third} if route_arr.count == 3
+      h[route_arr.first] = {route_arr.second => {route_arr.third => route_arr.fourth}} if route_arr.count == 4
+      route_str = "#{start_name}.joins(#{h.to_s}).last." + route_arr.join(".").gsub("s.", "s.last.")
       ap route_str
       return route_str
     end
 
-    def minimum_route(start_id, goal_id)
-      search_by_dikstra(start_id, goal_id)
+    def minimum_route(start_id, goal_id, max_cost)
+      search_by_dikstra(start_id, goal_id, max_cost)
       passage = @nodes.find { |node| node.id == goal_id }
       route = [passage]
       while passage = @nodes.find { |node| node.id == passage.from }
@@ -45,7 +50,7 @@ module PrettyAssociationInspect
       route
     end
 
-    def search_by_dikstra(start_id, goal_id)
+    def search_by_dikstra(start_id, goal_id, max_cost)
       @nodes.each do |node|
         node.cost = node.id == start_id ? 0 : nil
         node.done = false
@@ -63,6 +68,7 @@ module PrettyAssociationInspect
           reachble_node = @nodes.find { |node| node.id == edge.node_id }
           reachble_cost = next_node.cost + edge.cost
           next if reachble_node.nil?
+          next if reachble_cost > max_cost
           if reachble_node.cost.nil? || reachble_cost < reachble_node.cost
             reachble_node.cost = reachble_cost
             reachble_node.from = next_node.id
@@ -72,7 +78,7 @@ module PrettyAssociationInspect
     end
   end
 
-  def build_association_node(start)
+  def build_association_node(start, max_cost)
     models = ActiveRecord::Base.subclasses.map(&:name)
     data = models.each_with_object({}) do |model_name_str, hash|
       eval(model_name_str).reflect_on_all_associations.each do |m|
@@ -88,9 +94,10 @@ module PrettyAssociationInspect
     route_hash = {}
     data.each do |goal, v|
       next if start == goal
-      new_route = graph.print_route(graph.minimum_route(start, goal))
-      human_str = PrettyAssociationInspect.jp_scripe(eval(goal.to_s.camelize.singularize).model_name.human)
-      route_hash["#{human_str} #{goal}"] = new_route if new_route
+      new_route = graph.print_route(graph.minimum_route(start, goal, max_cost))
+      _model_ = ActiveRecord::Base.module_eval(goal.to_s.camelize.singularize).model_name.human rescue nil
+      human_str = PrettyAssociationInspect.jp_scripe(_model_)
+      route_hash["#{goal} #{human_str}"] = new_route if new_route
     end
     route_hash
   end
@@ -110,15 +117,15 @@ module PrettyAssociationInspect
         PrettyAssociationInspect.printed(klass, model, associations_hash)
         return self
       }
-      self.define_singleton_method(:toto){ |start = nil|
+      self.define_singleton_method(:toto){ |max_cost=1, start = nil|
         model_name_sym = model_name.singular.to_sym
-        route_arr = PrettyAssociationInspect.build_association_node start || model_name_sym
+        route_arr = PrettyAssociationInspect.build_association_node(start || model_name_sym, max_cost)
         ap route_arr
         return nil
       }
-      define_method(:toto){ |start = nil|
+      define_method(:toto){ |max_cost = 1, start = nil|
         model_name_sym = model_name.singular.to_sym
-        route_arr = PrettyAssociationInspect.build_association_node start || model_name_sym
+        route_arr = PrettyAssociationInspect.build_association_node(start || model_name_sym, max_cost)
         ap route_arr
         return nil
       }
