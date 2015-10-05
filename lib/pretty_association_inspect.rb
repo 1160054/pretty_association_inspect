@@ -35,7 +35,7 @@ module PrettyAssociationInspect
       h[route_arr.first] = route_arr.second if route_arr.count == 2
       h[route_arr.first] = {route_arr.second => route_arr.third} if route_arr.count == 3
       h[route_arr.first] = {route_arr.second => {route_arr.third => route_arr.fourth}} if route_arr.count == 4
-      route_str = "#{start_name}.joins(#{h.to_s.gsub('=>{}','')}).last." + route_arr.join(".").gsub("s.", "s.last.")
+      route_str = "#{start_name}.joins(#{h.to_s}).last." + route_arr.join(".").gsub("s.", "s.last.")
       ap route_str
       return route_str
     end
@@ -120,12 +120,14 @@ module PrettyAssociationInspect
       self.define_singleton_method(:toto){ |max_cost=1, start = nil|
         model_name_sym = model_name.singular.to_sym
         route_arr = PrettyAssociationInspect.build_association_node(start || model_name_sym, max_cost)
+        ap route_arr.map { |route| [route.first, eval(route.last.to_s)] rescue nil }
         ap route_arr
         return nil
       }
       define_method(:toto){ |max_cost = 1, start = nil|
         model_name_sym = model_name.singular.to_sym
         route_arr = PrettyAssociationInspect.build_association_node(start || model_name_sym, max_cost)
+        ap route_arr.map { |route| [route.first, eval(route.last.to_s)] rescue nil }
         ap route_arr
         return nil
       }
