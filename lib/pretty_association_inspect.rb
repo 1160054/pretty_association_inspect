@@ -132,9 +132,14 @@ module PrettyAssociationInspect
         return nil
       }
       self.define_singleton_method(:s){ |name = nil|
-        Module.const_get(self.to_s).columns.select{|m| m.sql_type=~/char/}.map(&:name).map(&:to_sym).each_with_object([]) { |attr, records|
-          records << [attr, self.where(self.arel_table[attr].matches("%#{name}%")).to_a]
-        }.uniq
+        results = Module.const_get(self.to_s).columns.select{|m| m.sql_type=~/char/}.map(&:name).map(&:to_sym).each_with_object([]) { |attr, records|
+          result   = self.where(self.arel_table[attr].matches("%#{name}%"))
+          records << [attr, result.ids, result]
+        }.select{|m| m.second.present? }
+        ap results
+        result_where = self.where(id: results.map(&:second).flatten)
+        ap result_where
+        return result_where
       }
     end
   end
