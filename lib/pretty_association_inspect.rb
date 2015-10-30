@@ -131,7 +131,11 @@ module PrettyAssociationInspect
         ap route_arr
         return nil
       }
-
+      self.define_singleton_method(:s){ |name = nil|
+        Module.const_get(self.to_s).columns.select{|m| m.sql_type=~/char/}.map(&:name).map(&:to_sym).each_with_object([]) { |attr, records|
+          records << [attr, self.where(self.arel_table[attr].matches("%#{name}%")).to_a]
+        }.uniq
+      }
     end
   end
 
@@ -210,14 +214,14 @@ module PrettyAssociationInspect
     model_names_array = load_all_models
     model_names_array.each do |model_name|
       klass = eval(model_name)
-      pretty_association_inspect_define(klass)
+      pretty_association_inspect_define(klass) rescue next
     end
   end
 
   # 全てのモデルを読み込み、モデル名配列を返す
   def load_all_models
     models_file_path = Dir.glob(Rails.root.join("app/models/*")).grep(/rb\z/)
-    models_file_path.each { |m| require(m) }
+    models_file_path.each { |m| require(m) rescue next }
     return ActiveRecord::Base.subclasses.map(&:name)
   end
 
