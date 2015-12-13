@@ -157,7 +157,7 @@ module PrettyAssociationInspect
   # アソシエーションをハッシュに変換
   def build_association_hash(model)
     pretty_hash = model.reflect_on_all_associations.each_with_object({}) do |m, hash|
-      name = m.class.class_name.gsub("Reflection", "").to_sym
+      name = m.class.to_s.gsub("ActiveRecord::Reflection::", "").gsub("Reflection", "").to_sym
       hash[name] ||= []
       human_name = PrettyAssociationInspect.jp_scripe(m.klass.model_name.human)
       hash[name] << [
@@ -218,17 +218,21 @@ module PrettyAssociationInspect
   def all_models_define
     model_names_array = load_all_models
     model_names_array.each do |model_name|
-      klass = eval(model_name)
-      pretty_association_inspect_define(klass) rescue next
+      begin
+        klass = eval(model_name)
+        pretty_association_inspect_define(klass)
+      rescue
+        next
+      end
     end
   end
 
   # 全てのモデルを読み込み、モデル名配列を返す
   def load_all_models
-    Dir.glob(Rails.root.join('app/models/**/*rb')).each{|m| load m }
+    #Dir.glob(Rails.root.join('app/models/*.rb')).each{|m| load m }
     models_file_path = Dir.glob(Rails.root.join("app/models/*")).grep(/rb\z/)
     models_file_path.each { |m| require(m) rescue next }
-    return ActiveRecord::Base.subclasses.map(&:name)
+    return ActiveRecord::Base.subclasses.map(&:name).delete_if { |m| m=~/City/ }
   end
 
 end
