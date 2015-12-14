@@ -198,7 +198,7 @@ module PrettyAssociationInspect
     ap (instance_m).delete_if{|name|
       delete_pattern.match(name) }.sort
     ap "[バリデーション]"
-    puts model.validators.map{|m|
+    ap model.validators.map{|m|
       m.class.name.gsub(/Active|Record|Validations|Model|Validator|::/,"")
         .concat(" #{m.attributes.join(', ')} #{m.options}") }.sort.uniq
     ap "[アソシエーション]"
@@ -232,15 +232,7 @@ module PrettyAssociationInspect
     #Dir.glob(Rails.root.join('app/models/*.rb')).each{|m| load m }
     models_file_path = Dir.glob(Rails.root.join("app/models/*")).grep(/rb\z/)
     models_file_path.each { |m| require(m) rescue next }
-    return ActiveRecord::Base.subclasses.map(&:name).delete_if { |m| m=~/City/ }
-  end
-
-  def ap(*args)
-    if Object.const_defined?("AwesomePrint")
-      ap args
-    else
-      puts args
-    end
+    return ActiveRecord::Base.subclasses.map(&:name)
   end
 
 end
@@ -253,4 +245,21 @@ module Kernel
     result = ActiveRecord::Base.connection.tables.map(&:classify).map{|m| Object.const_get(m) rescue nil}.each_with_object({}){|m,h| h[m.try(:name).try(:to_sym)] = m.try(:column_names)}.compact.select{|_,v| v.any?{|m| keyword.nil? ? true : m == keyword }}
     result.keys
   }
+end
+
+class Object
+  def ap(*args)
+    if Object.const_defined?("AwesomePrint")
+      ap args
+    else
+      puts args
+    end
+  end
+  def self.ap(*args)
+    if Object.const_defined?("AwesomePrint")
+      ap args
+    else
+      puts args
+    end
+  end
 end
