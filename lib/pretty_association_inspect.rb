@@ -235,100 +235,17 @@ module PrettyAssociationInspect
     return ActiveRecord::Base.subclasses.map(&:name).delete_if { |m| m=~/City/ }
   end
 
+  def ap(*args)
+    if Object.const_defined?("AwesomePrint")
+      ap args
+    else
+      puts args
+    end
+  end
+
 end
 module Kernel
   extend self
-  def field_num_hash
-    Hash[* %w(
-    address1 100
-    address2 100
-    available_start_date_note 1000
-    contactable_time_ranges_note 1000
-    email 100
-    experiences_note 1000
-    hoped_commuter_time 3
-    login_email 100
-    message 1000
-    name_kana_mei 10
-    name_kana_sei 10
-    name_mei 10
-    name_sei 10
-    other_hoped_condition 1000
-    post_code 7
-    salary_max 10
-    salary_min 10
-    school_name 100
-    self_pr 1000
-    tel 11
-    keywords 50
-    address1 100
-    address2 100
-    business_time_text 1000
-    capacity_text 1000
-    client_shop_type_text 1000
-    corporate_url 100
-    customer_quality_text 1000
-    deposit_person_name 100
-    email 100
-    employee_num 5
-    employee_number_text 1000
-    entry_flow_text 1000
-    fax1 11
-    holiday_text 1000
-    hope_character_text 1000
-    job_text 1000
-    job_type_text 1000
-    max_age 3
-    menu_text 1000
-    message 1000
-    min_age 3
-    owner_message 1000
-    person_name 20
-    person_name_kana 20
-    pr_text 1000
-    repayment_account_number 8
-    repayment_account_person_name 20
-    repayment_bank_branch_number 3
-    repayment_bank_number 4
-    salary_max 10
-    salary_min 10
-    salary_other 1000
-    shop_atmosphere_text 1000
-    skill_up_support_text 1000
-    staff_message 1000
-    tel 11
-    tel1 11
-    title 150
-    treatment_text 1000
-    wanted_recruit_count 5
-    work_hour_text 1000
-    work_location_text 1000
-    working_people_text 1000
-    zip_code 7
-    hoped_publishing_period 500
-    hoped_remark 500
-    name 20
-    name_kana 20
-    reason 500
-    remarks 500
-)]
-  end
-  def ssss
-    hash = field_num_hash.keys.each_with_object({}) do |keyword, hash|
-      sss(keyword).each do |m|
-        hash[m] ||= []
-         hash[m] << "#{keyword} #{PrettyAssociationInspect.jp_scripe(eval(m.to_s).human_attribute_name(keyword))}: #{field_num_hash[keyword]}"
-        #hash[m] << "validates :#{keyword}, length: { maximum: #{field_num_hash[keyword]} }"
-      end
-    end
-    hash.each do |k,v|
-       puts "#{k}<br>#{ PrettyAssociationInspect.jp_scripe(eval(k.to_s).model_name.human)} | #{v.join('<br>')}"
-    end
-    hash.each do |k,v|
-     # puts "#{k} | #{v.join('<br>')}"
-    end
-    hash
-  end
   define_method(:ss) {|keyword = nil|
     ActiveRecord::Base.connection.tables.map(&:classify).map{|m| Object.const_get(m) rescue nil}.each_with_object({}){|m,h| h[m.try(:name).try(:to_sym)] = m.try(:column_names)}.compact.select{|_,v| v.any?{|m| keyword.nil? ? true : m.match(keyword) }}
   }
