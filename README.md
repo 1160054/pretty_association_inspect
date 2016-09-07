@@ -18,6 +18,13 @@ Or install it yourself as:
 
 ## Usage
 
+### すべてのモデルでPrettyAssociationInspectのメソッドを呼べるようにする
+
+```rb
+a
+```
+
+
 ### メソッド、関連、バリデーションを表示する
 
 ```rb
