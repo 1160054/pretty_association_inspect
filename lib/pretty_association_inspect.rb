@@ -238,7 +238,7 @@ end
 module Kernel
   extend self
   define_method(:a) {
-    PrettyAssociationInspect.load_all_models
+    PrettyAssociationInspect.all_models_define
   }
   define_method(:ss) {|keyword = nil|
     ActiveRecord::Base.connection.tables.map(&:classify).map{|m| Object.const_get(m) rescue nil}.each_with_object({}){|m,h| h[m.try(:name).try(:to_sym)] = m.try(:column_names)}.compact.select{|_,v| v.any?{|m| keyword.nil? ? true : m.match(keyword) }}
