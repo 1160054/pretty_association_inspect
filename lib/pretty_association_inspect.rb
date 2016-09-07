@@ -235,6 +235,7 @@ module PrettyAssociationInspect
   end
 
 end
+PrettyAssociationInspect.load_all_models
 module Kernel
   extend self
   define_method(:ss) {|keyword = nil|
