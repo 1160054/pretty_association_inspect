@@ -229,7 +229,6 @@ module PrettyAssociationInspect
 
   # 全てのモデルを読み込み、モデル名配列を返す
   def load_all_models
-    #Dir.glob(Rails.root.join('app/models/*.rb')).each{|m| load m }
     models_file_path = Dir.glob(Rails.root.join("app/models/*")).grep(/rb\z/)
     models_file_path.each { |m| require(m) rescue next }
     return ActiveRecord::Base.subclasses.map(&:name)
@@ -245,21 +244,4 @@ module Kernel
     result = ActiveRecord::Base.connection.tables.map(&:classify).map{|m| Object.const_get(m) rescue nil}.each_with_object({}){|m,h| h[m.try(:name).try(:to_sym)] = m.try(:column_names)}.compact.select{|_,v| v.any?{|m| keyword.nil? ? true : m == keyword }}
     result.keys
   }
-end
-
-class Object
-  def ap(*args)
-    if Object.const_defined?("AwesomePrint")
-      ap args
-    else
-      puts args
-    end
-  end
-  def self.ap(*args)
-    if Object.const_defined?("AwesomePrint")
-      ap args
-    else
-      puts args
-    end
-  end
 end
